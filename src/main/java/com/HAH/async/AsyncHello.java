@@ -19,7 +19,11 @@ public class AsyncHello extends HttpServlet {
 		var out = resp.getWriter();
 //		Async can handle req and resp
 		var async = req.startAsync();
-		async.setTimeout(5000);
+		async.addListener(new HelloAsyncListener());
+
+		if (null != req.getParameter("error")) {
+			throw new RuntimeException("Errors Causing In Parameter. ");
+		}
 
 		out.append("""
 				<html>
@@ -33,7 +37,6 @@ public class AsyncHello extends HttpServlet {
 //		var thread = new Thread(getTask());
 //		thread.start();
 		async.start(getTask());
-		async.complete();
 
 		out.append("""
 				<p> This is heavy processing and waist my time. </p>
