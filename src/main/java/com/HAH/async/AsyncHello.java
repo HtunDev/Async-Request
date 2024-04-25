@@ -8,10 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(
-		urlPatterns = "/async",
-		asyncSupported = true
-		)
+@WebServlet(urlPatterns = "/async", asyncSupported = true)
 public class AsyncHello extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -20,8 +17,9 @@ public class AsyncHello extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		var out = resp.getWriter();
-
-		var asyncContext = req.startAsync();
+//		Async can handle req and resp
+		var async = req.startAsync();
+		async.setTimeout(5000);
 
 		out.append("""
 				<html>
@@ -31,16 +29,11 @@ public class AsyncHello extends HttpServlet {
 				<body>
 				<h1> Hello Async. I'm a new learner.</h>
 				""");
-
-		asyncContext.start(() -> {
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		});
-
-		asyncContext.complete();
+// 		Thread can't handle
+//		var thread = new Thread(getTask());
+//		thread.start();
+		async.start(getTask());
+		async.complete();
 
 		out.append("""
 				<p> This is heavy processing and waist my time. </p>
@@ -48,6 +41,16 @@ public class AsyncHello extends HttpServlet {
 				</body>
 				</html>
 				""");
+	}
+
+	private Runnable getTask() {
+		return () -> {
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		};
 	}
 
 }
